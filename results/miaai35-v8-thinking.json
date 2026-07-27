@@ -1,0 +1,106 @@
+{
+  "tag": "miaai35-v8-thinking",
+  "base": "http://127.0.0.1:8889",
+  "ts": "2026-07-16T22:09:04.092370",
+  "score": 82.5,
+  "vision_ran": true,
+  "checks": [
+    {
+      "name": "ttl_lru_cache",
+      "cat": "coding",
+      "pass": false,
+      "detail": "Traceback (most recent call last):\n  File \"/tmp/tmpi1k7iqtv.py\", line 4, in <module>\n    c = TTLCache(2, 10)\n        ^^^^^^^^\nNameError: name 'TTLCache' is not defined\n"
+    },
+    {
+      "name": "log_summarize",
+      "cat": "coding",
+      "pass": true,
+      "detail": "ALL_TESTS_PASS\n"
+    },
+    {
+      "name": "debug_fix_intervals",
+      "cat": "coding",
+      "pass": true,
+      "detail": "ALL_TESTS_PASS\n"
+    },
+    {
+      "name": "dedupe_products",
+      "cat": "coding",
+      "pass": false,
+      "detail": "Traceback (most recent call last):\n  File \"/tmp/tmpykw5lwju.py\", line 10, in <module>\n    r = dedupe_products(items)\n        ^^^^^^^^^^^^^^^\nNameError: name 'dedupe_products' is not defined\n"
+    },
+    {
+      "name": "pick_shell_tool",
+      "cat": "tools",
+      "pass": true,
+      "detail": "call=run_shell args={'command': 'systemctl --user status llama-miaai35'} content="
+    },
+    {
+      "name": "pick_browse_tool",
+      "cat": "tools",
+      "pass": true,
+      "detail": "call=browse_url args={'url': 'https://mempool.space'} content="
+    },
+    {
+      "name": "no_tool_when_direct",
+      "cat": "tools",
+      "pass": true,
+      "detail": "call=None content=391"
+    },
+    {
+      "name": "schedule_math",
+      "cat": "agentic",
+      "pass": true,
+      "detail": "05:50"
+    },
+    {
+      "name": "plan_order",
+      "cat": "agentic",
+      "pass": true,
+      "detail": "lint, build, tests, deploy, docs"
+    },
+    {
+      "name": "extract_dedupe_5",
+      "cat": "web",
+      "pass": true,
+      "detail": "n=5 brands=['asus', 'gigabyte', 'msi', 'pny', 'zotac']"
+    },
+    {
+      "name": "fields_exact",
+      "cat": "web",
+      "pass": true,
+      "detail": "gigabyte={'brand': 'Gigabyte', 'price': 619.5, 'in_stock': True} zotac={'brand': 'Zotac', 'price': 589.99, 'in_stock': False}"
+    },
+    {
+      "name": "cheapest_in_stock",
+      "cat": "web",
+      "pass": true,
+      "detail": "got=PNY (zotac 589.99 is preorder; asus OOS; answer=PNY 609)"
+    },
+    {
+      "name": "chart_read",
+      "cat": "vision",
+      "pass": true,
+      "detail": "The fastest model is **Qwen35B** with a value of **169** tokens/sec. The value for DSpark is **55**."
+    },
+    {
+      "name": "ui_error_read",
+      "cat": "vision",
+      "pass": true,
+      "detail": "1. **Error:** \"Error: config.yaml missing [symbol] deploy blocked\" (Note: there is a square box with an X inside where a"
+    },
+    {
+      "name": "ui_disabled_btn",
+      "cat": "vision",
+      "pass": true,
+      "detail": "1. **Error:** \"Error: config.yaml missing [symbol] deploy blocked\" (Note: there is a square box with an X inside where a"
+    }
+  ],
+  "tps_median": {
+    "coding": 94.7,
+    "tools": 73.9,
+    "agentic": 88.4,
+    "web": 114.6,
+    "vision": 80.7
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "tag": "miaai35-v8-baseline",
+  "base": "http://127.0.0.1:8889",
+  "ts": "2026-07-16T22:01:01.029791",
+  "score": 95.0,
+  "vision_ran": true,
+  "checks": [
+    {
+      "name": "ttl_lru_cache",
+      "cat": "coding",
+      "pass": true,
+      "detail": "ALL_TESTS_PASS\n"
+    },
+    {
+      "name": "log_summarize",
+      "cat": "coding",
+      "pass": true,
+      "detail": "ALL_TESTS_PASS\n"
+    },
+    {
+      "name": "debug_fix_intervals",
+      "cat": "coding",
+      "pass": true,
+      "detail": "ALL_TESTS_PASS\n"
+    },
+    {
+      "name": "dedupe_products",
+      "cat": "coding",
+      "pass": true,
+      "detail": "ALL_TESTS_PASS\n"
+    },
+    {
+      "name": "pick_shell_tool",
+      "cat": "tools",
+      "pass": true,
+      "detail": "call=run_shell args={'command': 'systemctl --user status llama-miaai35 2>&1 | head -20'} content="
+    },
+    {
+      "name": "pick_browse_tool",
+      "cat": "tools",
+      "pass": true,
+      "detail": "call=browse_url args={'url': 'https://mempool.space'} content="
+    },
+    {
+      "name": "no_tool_when_direct",
+      "cat": "tools",
+      "pass": true,
+      "detail": "call=None content=391"
+    },
+    {
+      "name": "schedule_math",
+      "cat": "agentic",
+      "pass": false,
+      "detail": "05:35"
+    },
+    {
+      "name": "plan_order",
+      "cat": "agentic",
+      "pass": true,
+      "detail": "lint, build, tests, deploy, docs"
+    },
+    {
+      "name": "extract_dedupe_5",
+      "cat": "web",
+      "pass": true,
+      "detail": "n=5 brands=['asus', 'gigabyte', 'msi', 'pny', 'zotac']"
+    },
+    {
+      "name": "fields_exact",
+      "cat": "web",
+      "pass": true,
+      "detail": "gigabyte={'brand': 'Gigabyte', 'price': 619.5, 'in_stock': True} zotac={'brand': 'Zotac', 'price': 589.99, 'in_stock': False}"
+    },
+    {
+      "name": "cheapest_in_stock",
+      "cat": "web",
+      "pass": true,
+      "detail": "got=PNY (zotac 589.99 is preorder; asus OOS; answer=PNY 609)"
+    },
+    {
+      "name": "chart_read",
+      "cat": "vision",
+      "pass": true,
+      "detail": "Fastest: Qwen35B at 169 tokens/sec. DSpark: 55 tokens/sec."
+    },
+    {
+      "name": "ui_error_read",
+      "cat": "vision",
+      "pass": true,
+      "detail": "1) Error: config.yaml missing \u2192 deploy blocked  \n2) Disabled button: Deploy"
+    },
+    {
+      "name": "ui_disabled_btn",
+      "cat": "vision",
+      "pass": true,
+      "detail": "1) Error: config.yaml missing \u2192 deploy blocked  \n2) Disabled button: Deploy"
+    }
+  ],
+  "tps_median": {
+    "coding": 87.6,
+    "tools": 110.6,
+    "agentic": 70.0,
+    "web": 115.6,
+    "vision": 73.1
+  }
+}

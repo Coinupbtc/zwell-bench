@@ -1,0 +1,106 @@
+{
+  "tag": "mimo-v25-iq2m-baseline",
+  "base": "http://NODE2_HOST:8100",
+  "ts": "2026-07-16T22:02:31.799865",
+  "score": 81.2,
+  "vision_ran": true,
+  "checks": [
+    {
+      "name": "ttl_lru_cache",
+      "cat": "coding",
+      "pass": true,
+      "detail": "ALL_TESTS_PASS\n"
+    },
+    {
+      "name": "log_summarize",
+      "cat": "coding",
+      "pass": true,
+      "detail": "ALL_TESTS_PASS\n"
+    },
+    {
+      "name": "debug_fix_intervals",
+      "cat": "coding",
+      "pass": true,
+      "detail": "ALL_TESTS_PASS\n"
+    },
+    {
+      "name": "dedupe_products",
+      "cat": "coding",
+      "pass": false,
+      "detail": "st):\n  File \"/tmp/tmpugohr1d5.py\", line 35, in <module>\n    assert len(r) == 2, r\n           ^^^^^^^^^^^\nAssertionError: [{'title': 'Pikachu Plush  (2-pack)', 'price': 29.99, 'url': 'a'}, {'title': 'p"
+    },
+    {
+      "name": "pick_shell_tool",
+      "cat": "tools",
+      "pass": true,
+      "detail": "call=run_shell args={'command': 'systemctl --user status llama-miaai35'} content=I'll check the status of the systemd user service `llama-miaai35` on this machin"
+    },
+    {
+      "name": "pick_browse_tool",
+      "cat": "tools",
+      "pass": true,
+      "detail": "call=browse_url args={'url': 'https://mempool.space'} content="
+    },
+    {
+      "name": "no_tool_when_direct",
+      "cat": "tools",
+      "pass": false,
+      "detail": "call=run_shell content="
+    },
+    {
+      "name": "schedule_math",
+      "cat": "agentic",
+      "pass": false,
+      "detail": "06:35"
+    },
+    {
+      "name": "plan_order",
+      "cat": "agentic",
+      "pass": true,
+      "detail": "lint, build, tests, deploy, docs"
+    },
+    {
+      "name": "extract_dedupe_5",
+      "cat": "web",
+      "pass": true,
+      "detail": "n=5 brands=['asus', 'gigabyte', 'msi', 'pny', 'zotac']"
+    },
+    {
+      "name": "fields_exact",
+      "cat": "web",
+      "pass": true,
+      "detail": "gigabyte={'brand': 'Gigabyte', 'price': 619.5, 'in_stock': True} zotac={'brand': 'Zotac', 'price': 589.99, 'in_stock': False}"
+    },
+    {
+      "name": "cheapest_in_stock",
+      "cat": "web",
+      "pass": true,
+      "detail": "got=PNY (zotac 589.99 is preorder; asus OOS; answer=PNY 609)"
+    },
+    {
+      "name": "chart_read",
+      "cat": "vision",
+      "pass": true,
+      "detail": "Based on the bar chart:\n\n*   **Fastest Model:** Qwen35B with a value of **169** tokens/sec.\n*   **DSpark Value:** **55**"
+    },
+    {
+      "name": "ui_error_read",
+      "cat": "vision",
+      "pass": true,
+      "detail": "Based on the screenshot provided:\n\n1.  **Exact error:** The error shown is **\"Error: config.yaml missing \u2612 deploy blocke"
+    },
+    {
+      "name": "ui_disabled_btn",
+      "cat": "vision",
+      "pass": true,
+      "detail": "Based on the screenshot provided:\n\n1.  **Exact error:** The error shown is **\"Error: config.yaml missing \u2612 deploy blocke"
+    }
+  ],
+  "tps_median": {
+    "coding": 23.9,
+    "tools": 24.4,
+    "agentic": 27.1,
+    "web": 23.5,
+    "vision": 23.6
+  }
+}
