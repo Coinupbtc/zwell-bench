@@ -1,6 +1,8 @@
-# Local envs / caches — never commit
+.env
+.env.*
+!.env.example
 .venv/
 venv/
 __pycache__/
+node_modules/
 *.pyc
-.pytest_cache/
