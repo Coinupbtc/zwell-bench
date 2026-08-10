@@ -1,5 +1,11 @@
 # zwell-bench
 
+![Screenshot](docs/screenshots/hero.png)
+
+
+
+![Screenshot](docs/screenshots/hero.png)
+
 Endpoint-agnostic **local LLM bakeoff** harness for DGX Spark (or any box with an OpenAI-compatible API).
 
 Checks are objective: executed coding tests, exact JSON extraction, vision reads, tool choice, agentic ordering.
