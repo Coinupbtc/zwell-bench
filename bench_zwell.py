@@ -13,7 +13,7 @@ gen t/s. Vision auto-skips (score renormalized, noted) if the endpoint rejects i
 
 Usage:
   ZWELL_BASE=http://127.0.0.1:8889 python3 bench_zwell.py --tag miaai35-baseline
-  ZWELL_BASE=http://NODE2_HOST:8100 python3 bench_zwell.py --tag mimo-v25-iq2m
+  ZWELL_BASE=http://192.168.100.11:8100 python3 bench_zwell.py --tag mimo-v25-iq2m
 """
 import argparse, base64, datetime, json, os, pathlib, re, statistics, subprocess, tempfile, time, urllib.request
 
@@ -26,6 +26,7 @@ WEIGHTS = {"coding": 0.35, "web": 0.20, "vision": 0.20, "tools": 0.15, "agentic"
 
 CHECKS = []
 TPS = {}
+CODE_DIAG = ""   # why the last ask_code() produced no runnable code
 
 def check(name, cat, passed, detail=""):
     CHECKS.append({"name": name, "cat": cat, "pass": bool(passed), "detail": str(detail)[:200]})
@@ -35,11 +36,21 @@ MAXTOK_MULT = float(os.environ.get("ZWELL_MAXTOK_MULT", "1"))
 
 THINKING = os.environ.get("ZWELL_THINKING", "off") == "on"
 
-def chat(messages, max_tokens=1200, tools=None, temperature=0.1, thinking=None):
+# Sampling is a FAIRNESS knob, not a style knob. Reasoning models degenerate into
+# repetitive think-loops at very low temperature — they burn the whole budget and emit
+# no answer, which scores as incapability. GLM-5.2's own generation_config.json asks
+# for temperature=1.0 / top_p=0.95. Default to the vendor value; override to compare.
+TEMP = float(os.environ.get("ZWELL_TEMP", "1.0"))
+TOP_P = float(os.environ["ZWELL_TOP_P"]) if os.environ.get("ZWELL_TOP_P") else 0.95
+
+def chat(messages, max_tokens=1200, tools=None, temperature=None, thinking=None):
     thinking = THINKING if thinking is None else thinking
+    temperature = TEMP if temperature is None else temperature
     body = {"model": MODEL, "messages": messages, "temperature": temperature,
             "max_tokens": int(max_tokens * MAXTOK_MULT),
             "chat_template_kwargs": {"enable_thinking": thinking}}
+    if TOP_P is not None:
+        body["top_p"] = TOP_P
     if tools:
         body["tools"] = tools
     req = urllib.request.Request(BASE + "/v1/chat/completions",
@@ -52,20 +63,46 @@ def chat(messages, max_tokens=1200, tools=None, temperature=0.1, thinking=None):
     t = d.get("timings", {})
     msg = d["choices"][0]["message"]
     content = msg.get("content") or ""
-    content = re.sub(r"<think>.*?</think>", "", content, flags=re.S).strip()
+    # Thinking models: prefer the server-side split when a --reasoning-parser is wired
+    # (vLLM puts the trace in reasoning_content and leaves `content` = answer only).
+    reasoning = msg.get("reasoning_content") or msg.get("reasoning")
+    if not reasoning:
+        # Fallback for a server with NO reasoning parser. Templates like GLM-5.2's end with
+        # '<|assistant|><think>', so the OPENING tag is in the prompt and never appears in
+        # content — a paired <think>...</think> regex silently matches nothing and the whole
+        # scratchpad gets graded as the answer. Cut at the last closing tag first.
+        if "</think>" in content:
+            content = content.rsplit("</think>", 1)[-1]
+        content = re.sub(r"<think>.*?</think>", "", content, flags=re.S)
+    content = content.strip()
     tps = t.get("predicted_per_second")
     n = t.get("predicted_n") or d.get("usage", {}).get("completion_tokens")
     if tps is None and n and wall > 0:
         tps = n / wall
-    return {"content": content, "tool_calls": msg.get("tool_calls"), "tps": tps, "n": n}
+    # finish/reasoning are forensics: without them an empty `content` is indistinguishable
+    # from a wrong answer, and a budget-limited run scores as incapability.
+    return {"content": content, "tool_calls": msg.get("tool_calls"), "tps": tps, "n": n,
+            "finish": d["choices"][0].get("finish_reason"),
+            "reasoning_len": len(reasoning or ""), "budget": int(max_tokens * MAXTOK_MULT)}
 
 def note_tps(cat, r):
     if r.get("tps"):
         TPS.setdefault(cat, []).append(r["tps"])
 
 def extract_code(text):
+    """Return (code, how). `how` is 'fenced' | 'bare' | 'none'.
+
+    Never return prose as code: an unfenced English answer used to be handed to python3
+    verbatim, which crashes as `NameError: name '<fn>' is not defined` — a message that
+    looks exactly like the model writing a broken implementation. Unfenced text is only
+    accepted when it actually looks like Python.
+    """
     m = re.findall(r"```(?:python)?\s*\n(.*?)```", text, re.S)
-    return m[-1] if m else text
+    if m:
+        return m[-1], "fenced"
+    if re.search(r"^\s*(def|class|import|from)\s+\w", text, re.M):
+        return text, "bare"
+    return "", "none"
 
 def extract_json(text):
     m = re.findall(r"```(?:json)?\s*\n(.*?)```", text, re.S)
@@ -81,6 +118,9 @@ def extract_json(text):
     return None
 
 def run_python(code, test_code):
+    # An empty extraction must report WHY, not fake a NameError from the test harness.
+    if not code.strip():
+        return False, CODE_DIAG
     with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as f:
         f.write(code + "\n\n" + test_code + "\nprint('ALL_TESTS_PASS')\n")
         path = f.name
@@ -92,11 +132,26 @@ def run_python(code, test_code):
     finally:
         pathlib.Path(path).unlink(missing_ok=True)
 
-def ask_code(prompt):
-    r = chat([{"role": "system", "content": "You are an expert Python engineer. Reply with a single ```python code block containing only the implementation (no example usage, no tests)."},
-              {"role": "user", "content": prompt}], max_tokens=1600)
+def ask_code(prompt, budget=1600):
+    global CODE_DIAG
+    msgs = [{"role": "system", "content": "You are an expert Python engineer. Reply with a single ```python code block containing only the implementation (no example usage, no tests)."},
+            {"role": "user", "content": prompt}]
+    r = chat(msgs, max_tokens=budget)
     note_tps("coding", r)
-    return extract_code(r["content"])
+    code, how = extract_code(r["content"])
+    # Fair retry: a reasoning model that spent its whole budget thinking has been measured
+    # on its budget, not its ability. Give it one clean pass with 3x the room.
+    if how == "none":
+        print(f"      !! no answer emitted (finish={r['finish']} n={r['n']}/{r['budget']} "
+              f"reasoning={r['reasoning_len']}ch content={len(r['content'])}ch) — retry at {budget*3}",
+              flush=True)
+        r = chat(msgs, max_tokens=budget * 3)
+        note_tps("coding", r)
+        code, how = extract_code(r["content"])
+    CODE_DIAG = (f"NO CODE EMITTED after retry (finish={r['finish']} n={r['n']}/{r['budget']} "
+                 f"reasoning={r['reasoning_len']}ch content={len(r['content'])}ch): {r['content'][:120]!r}"
+                 if how == "none" else f"[{how}] finish={r['finish']} n={r['n']}/{r['budget']}")
+    return code
 
 # ---------------------------------------------------------------- C. coding
 def suite_coding():
@@ -121,20 +176,20 @@ assert c.get('d', 12.5) == 4
 
     code = ask_code(
         "Write a function summarize_log(text) that parses lines like "
-        "'2026-07-16 05:41:02 [ERROR] svc-gateway: exit 2' (level is INFO, WARN or ERROR; "
+        "'2026-07-16 05:41:02 [ERROR] hermes-gateway-light: exit 2' (level is INFO, WARN or ERROR; "
         "service name precedes the colon). Ignore lines that do not match. Return a dict "
         "{'errors': <count of ERROR lines>, 'by_service': {service: count of ERROR lines for that service}, "
         "'first_error': <full first ERROR line or None>}.")
     ok, why = run_python(code, """
-t = '''2026-07-16 05:41:02 [ERROR] svc-gateway: exit 2
+t = '''2026-07-16 05:41:02 [ERROR] hermes-gateway-light: exit 2
 garbage line
 2026-07-16 05:42:10 [WARN] ollama: slow
-2026-07-16 06:00:00 [ERROR] svc-gateway: exit 2
-2026-07-16 06:01:00 [ERROR] backup-agent: lock timeout'''
+2026-07-16 06:00:00 [ERROR] hermes-gateway-light: exit 2
+2026-07-16 06:01:00 [ERROR] restic: lock timeout'''
 r = summarize_log(t)
 assert r['errors'] == 3, r
-assert r['by_service'] == {'svc-gateway': 2, 'backup-agent': 1}, r
-assert r['first_error'] == '2026-07-16 05:41:02 [ERROR] svc-gateway: exit 2', r
+assert r['by_service'] == {'hermes-gateway-light': 2, 'restic': 1}, r
+assert r['first_error'] == '2026-07-16 05:41:02 [ERROR] hermes-gateway-light: exit 2', r
 """)
     check("log_summarize", "coding", ok, why)
 
