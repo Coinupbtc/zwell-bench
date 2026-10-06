@@ -8,7 +8,7 @@ Cold open as a stranger (~15 min). Surface: README + screenshot + try-it path.
 2. **Primary path:** ./setup.sh then bench_zwell.py
 3. **Break/empty:** Missing deps fail with a readable next step in README/setup.
 4. **Loading:** First-run / setup prints next steps clearly.
-5. **Plain English + photo:** README embeds `docs/screenshots/hero.png` (no secrets).
+5. **Plain English + photo:** README embeds `docs/screenshots/hero.png` (no secrets). The shot is the committed `miaai35-v8-baseline` scorecard (**14/15**, weighted 95.0, failed `schedule_math`) — not 19/19 and not a perfect score.
 
 ## States
 

@@ -8,8 +8,10 @@ Endpoint-agnostic eval for Zwell candidates, weighted by the Zwell mission:
   T. tool-call   (15%) — correct tool + args, tool choice, and knowing when NOT to call
   A. agentic     (10%) — multi-step exact-answer reasoning / plan ordering
 
-Every check is objective (executed, exact, or strict-contains). Reports per-category
-gen t/s. Vision auto-skips (score renormalized, noted) if the endpoint rejects images.
+Every check is objective (executed, exact, or strict-contains). v1 suite is **15 checks**
+(not 19). The printed score is category-weighted (see WEIGHTS), not raw n/15.
+Reports per-category gen t/s. Vision auto-skips (score renormalized, noted) if the
+endpoint rejects images.
 
 Usage:
   ZWELL_BASE=http://127.0.0.1:8889 python3 bench_zwell.py --tag miaai35-baseline
@@ -22,6 +24,8 @@ MODEL = os.environ.get("ZWELL_MODEL", "m")
 HERE = pathlib.Path(__file__).resolve().parent
 ASSETS = HERE / "assets"
 RESULTS = HERE / "results"
+# Category weights for the 15-check suite. A single agentic miss is 5 points (10%/2),
+# so 14/15 prints as 95.0 — not 19/19 and not 93%.
 WEIGHTS = {"coding": 0.35, "web": 0.20, "vision": 0.20, "tools": 0.15, "agentic": 0.10}
 
 CHECKS = []
