@@ -23,9 +23,9 @@ Checks in `bench_zwell.py`: coding (`ttl_lru_cache`, `log_summarize`, `debug_fix
 
 | | |
 |---|---|
-| **What it is** | An **endpoint-agnostic local-LLM bakeoff harness** — 15 objective checks (coding executed, web extraction, vision, tool-calling, agentic) against any OpenAI-compatible API. |
-| **What it’s for** | Honest head-to-head comparison of local models/servers with **objective** pass/fail (not vibes or chat screenshots). |
-| **How to use it** | `./setup.sh`, then `ZWELL_BASE=http://127.0.0.1:8889 ./.venv/bin/python bench_zwell.py --tag my-model`. Or just open `results/` for example JSON. |
+| **What it is** | A **15-check** local-LLM release gate — coding (executed), web extraction, vision, tool-calling, and agentic checks against any OpenAI-compatible API. The printed score is category-weighted, not raw n/n. |
+| **What it’s for** | Honest head-to-head comparison. A candidate ships only if every check passes. The published 16 July 2026 run (`miaai35-v8-baseline`) is **14/15**, weighted **95.0**, failed `schedule_math`. That is not a pass. |
+| **How to use it** | `./setup.sh`, then `ZWELL_BASE=http://127.0.0.1:8889 ./.venv/bin/python bench_zwell.py --tag my-model`. Or open `results/` for the committed JSON (none is 15/15). |
 
 ## Try it (pick one)
 
