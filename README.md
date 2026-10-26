@@ -1,12 +1,12 @@
 # zwell-bench
 
-![Committed miaai35-v8-baseline scorecard: 14/15 checks, weighted 95.0, failed schedule_math — not 19/19](docs/screenshots/hero.png)
+![Committed miaai35-v8-baseline scorecard: 14/15 checks, weighted 95.0, failed schedule_math](docs/screenshots/hero.png)
 
 Endpoint-agnostic **local LLM bakeoff** harness for DGX Spark (or any box with an OpenAI-compatible API).
 
-`bench_zwell.py` defines **15** objective checks (not 19): executed coding tests, exact JSON extraction, vision reads, tool choice, agentic ordering. The headline number is **category-weighted** (coding 35%, web 20%, vision 20%, tools 15%, agentic 10%), so 14/15 can be 95.0 — it is not raw n/n and it is not 19/19.
+`bench_zwell.py` defines **15** objective checks: executed coding tests, exact JSON extraction, vision reads, tool choice, agentic ordering. The headline number is **category-weighted** (coding 35%, web 20%, vision 20%, tools 15%, agentic 10%), so 14/15 scores 95.0 rather than a raw 93%.
 
-The screenshot is the committed `results/miaai35-v8-baseline.json` run: **14/15**, weighted **95.0/100**, failed `agentic/schedule_math`. That is not a perfect score. All four files in `results/` are the bakeoff as run; none is a full pass, and none was cherry-picked.
+The screenshot is the committed `results/miaai35-v8-baseline.json` run: **14/15**, weighted **95.0/100**, failed `agentic/schedule_math`. All four files in `results/` are the bakeoff as run; none is a full pass, and none was cherry-picked.
 
 ## Committed results (15-check harness)
 
@@ -18,6 +18,8 @@ The screenshot is the committed `results/miaai35-v8-baseline.json` run: **14/15*
 | `mimo-v25-iq2m-baseline` | 12/15 | 81.2 | `dedupe_products`, `no_tool_when_direct`, `schedule_math` |
 
 Checks in `bench_zwell.py`: coding (`ttl_lru_cache`, `log_summarize`, `debug_fix_intervals`, `dedupe_products`); tools (`pick_shell_tool`, `pick_browse_tool`, `no_tool_when_direct`); agentic (`schedule_math`, `plan_order`); web (`extract_dedupe_5`, `fields_exact`, `cheapest_in_stock`); vision (`chart_read`, `ui_error_read`, `ui_disabled_btn`). `bench_coinupbtc.py` is a separate 11-check personal eval and is **not** part of these scores.
+
+The separate 19-check release gate (`bench_v5.py`) lives in [miaai35-tune](https://github.com/Coinupbtc/miaai35-tune).
 
 ## At a glance
 
